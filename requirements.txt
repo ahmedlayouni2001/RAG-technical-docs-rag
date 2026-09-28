@@ -1,0 +1,16 @@
+langchain
+langchain-core
+langchain-community
+langchain-openai
+langchain-cohere
+langchain-chroma
+langchain-text-splitters
+langgraph
+chromadb
+rank-bm25
+python-dotenv
+pydantic
+fastapi
+uvicorn[standard]
+ragas
+pytest

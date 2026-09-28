@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Technical Docs Assistant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #12141C;
+    --surface: #1B1E2A;
+    --surface-raised: #232738;
+    --line: #2A2E3D;
+    --paper: #E8E6DF;
+    --paper-dim: #9AA0AE;
+    --signal: #F2A65A;
+    --signal-dim: #4A3B2A;
+    --trace: #6FD3C7;
+    --trace-dim: #253634;
+    --error: #E06B6B;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'IBM Plex Sans', sans-serif;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+  }
+
+  .app {
+    width: 100%;
+    max-width: 720px;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+
+  header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  header h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+
+  header .subtitle {
+    font-size: 0.8rem;
+    color: var(--paper-dim);
+    margin-top: 2px;
+  }
+
+  .status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    color: var(--paper-dim);
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--paper-dim);
+    transition: background 0.3s ease;
+  }
+  .status-dot.online { background: var(--trace); }
+  .status-dot.offline { background: var(--error); }
+
+  .log {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .empty-state {
+    margin: auto;
+    text-align: center;
+    color: var(--paper-dim);
+    max-width: 380px;
+  }
+  .empty-state h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    color: var(--paper);
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+  }
+
+  .message {
+    max-width: 85%;
+    animation: rise 0.25s ease;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .message { animation: none; }
+  }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .message.user {
+    align-self: flex-end;
+  }
+  .message.assistant {
+    align-self: flex-start;
+  }
+
+  .bubble {
+    padding: 12px 16px;
+    border-radius: 14px;
+    line-height: 1.55;
+    font-size: 0.95rem;
+    white-space: pre-wrap;
+  }
+  .message.user .bubble {
+    background: var(--signal-dim);
+    border: 1px solid var(--signal);
+    border-bottom-right-radius: 4px;
+  }
+  .message.assistant .bubble {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-bottom-left-radius: 4px;
+  }
+  .message.system .bubble {
+    background: transparent;
+    border: 1px dashed var(--error);
+    color: var(--error);
+    font-size: 0.85rem;
+  }
+
+  .sources {
+    margin-top: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .source-label {
+    font-size: 0.7rem;
+    color: var(--paper-dim);
+    width: 100%;
+    margin-bottom: 2px;
+  }
+  .source-chip {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--trace);
+    background: var(--trace-dim);
+    border: 1px solid var(--trace);
+    border-radius: 6px;
+    padding: 3px 8px;
+  }
+
+  .loading .bubble {
+    color: var(--paper-dim);
+    font-style: italic;
+  }
+
+  form {
+    display: flex;
+    gap: 10px;
+    padding: 16px 24px 20px;
+    border-top: 1px solid var(--line);
+  }
+
+  input[type="text"] {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: var(--paper);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 0.95rem;
+  }
+  input[type="text"]:focus {
+    outline: 2px solid var(--signal);
+    outline-offset: 1px;
+  }
+  input[type="text"]::placeholder { color: var(--paper-dim); }
+
+  button {
+    background: var(--signal);
+    color: var(--ink);
+    border: none;
+    border-radius: 10px;
+    padding: 0 20px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-weight: 500;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+  button:focus-visible {
+    outline: 2px solid var(--paper);
+    outline-offset: 2px;
+  }
+  button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header>
+    <div>
+      <h1>Technical Docs Assistant</h1>
+      <div class="subtitle">Answers grounded in the real documentation</div>
+    </div>
+    <div class="status">
+      <span id="statusText">connecting…</span>
+      <span class="status-dot" id="statusDot"></span>
+    </div>
+  </header>
+
+  <div class="log" id="log" aria-live="polite">
+    <div class="empty-state" id="emptyState">
+      <h2>Ask about the docs</h2>
+      <div>e.g. "How do I use dependency injection with yield?"</div>
+    </div>
+  </div>
+
+  <form id="chatForm">
+    <input
+      type="text"
+      id="questionInput"
+      placeholder="Ask about the documentation…"
+      autocomplete="off"
+      required
+    >
+    <button type="submit" id="sendButton">Ask</button>
+  </form>
+</div>
+
+<script>
+  // Same-origin by default: the backend serves this file itself, so requests
+  // go back to whatever host/port loaded this page. Set this only if you're
+  // opening index.html separately from a backend running elsewhere.
+  const API_BASE_URL = "";
+
+  const log = document.getElementById("log");
+  const emptyState = document.getElementById("emptyState");
+  const form = document.getElementById("chatForm");
+  const input = document.getElementById("questionInput");
+  const sendButton = document.getElementById("sendButton");
+  const statusDot = document.getElementById("statusDot");
+  const statusText = document.getElementById("statusText");
+
+  const LOADING_STAGES = ["Searching docs…", "Checking relevance…", "Writing answer…"];
+
+  function scrollToBottom() {
+    log.scrollTop = log.scrollHeight;
+  }
+
+  function hideEmptyState() {
+    if (emptyState) emptyState.remove();
+  }
+
+  function addMessage(role, text) {
+    hideEmptyState();
+    const wrapper = document.createElement("div");
+    wrapper.className = `message ${role}`;
+    const bubble = document.createElement("div");
+    bubble.className = "bubble";
+    bubble.textContent = text;
+    wrapper.appendChild(bubble);
+    log.appendChild(wrapper);
+    scrollToBottom();
+    return wrapper;
+  }
+
+  function addSources(wrapper, sources) {
+    if (!sources || sources.length === 0) return;
+    const container = document.createElement("div");
+    container.className = "sources";
+    const label = document.createElement("div");
+    label.className = "source-label";
+    label.textContent = "Found in:";
+    container.appendChild(label);
+    sources.forEach((source) => {
+      const chip = document.createElement("span");
+      chip.className = "source-chip";
+      chip.textContent = source;
+      container.appendChild(chip);
+    });
+    wrapper.appendChild(container);
+  }
+
+  function addLoadingMessage() {
+    hideEmptyState();
+    const wrapper = document.createElement("div");
+    wrapper.className = "message assistant loading";
+    const bubble = document.createElement("div");
+    bubble.className = "bubble";
+    bubble.textContent = LOADING_STAGES[0];
+    wrapper.appendChild(bubble);
+    log.appendChild(wrapper);
+    scrollToBottom();
+
+    let stage = 0;
+    const interval = setInterval(() => {
+      stage = (stage + 1) % LOADING_STAGES.length;
+      bubble.textContent = LOADING_STAGES[stage];
+    }, 1400);
+
+    return { wrapper, stop: () => clearInterval(interval) };
+  }
+
+  async function checkHealth() {
+    try {
+      const response = await fetch(`${API_BASE_URL}/health`);
+      if (response.ok) {
+        statusDot.className = "status-dot online";
+        statusText.textContent = "connected";
+      } else {
+        throw new Error("unhealthy");
+      }
+    } catch (err) {
+      statusDot.className = "status-dot offline";
+      statusText.textContent = "backend unreachable";
+    }
+  }
+
+  async function askQuestion(question) {
+    const loading = addLoadingMessage();
+    sendButton.disabled = true;
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question }),
+      });
+
+      loading.stop();
+      loading.wrapper.remove();
+
+      if (!response.ok) {
+        const errorBody = await response.json().catch(() => ({}));
+        const detail = errorBody.detail || "The request could not be completed.";
+        addMessage("system", `Request failed: ${detail}`);
+        return;
+      }
+
+      const data = await response.json();
+      const wrapper = addMessage("assistant", data.answer);
+      addSources(wrapper, data.sources);
+    } catch (err) {
+      loading.stop();
+      loading.wrapper.remove();
+      addMessage("system", "Could not reach the backend. Is it running?");
+    } finally {
+      sendButton.disabled = false;
+    }
+  }
+
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const question = input.value.trim();
+    if (!question) return;
+    addMessage("user", question);
+    input.value = "";
+    askQuestion(question);
+  });
+
+  checkHealth();
+</script>
+
+</body>
+</html>

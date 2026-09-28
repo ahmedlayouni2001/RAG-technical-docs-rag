@@ -1,0 +1,82 @@
+[
+  {
+    "question": "What decorator do you use to define a GET endpoint in FastAPI?",
+    "ground_truth": "You use the @app.get() decorator (or @router.get() with an APIRouter) above the path operation function.",
+    "type": "factual"
+  },
+  {
+    "question": "How do I use dependency injection with yield in FastAPI?",
+    "ground_truth": "Define a dependency function that uses yield instead of return. Code before the yield runs before the request is handled; code after the yield runs as cleanup, even if an exception occurred.",
+    "type": "exact_terms"
+  },
+  {
+    "question": "What HTTP status code does FastAPI return by default when request validation fails?",
+    "ground_truth": "FastAPI returns HTTP 422 Unprocessable Entity by default for validation errors.",
+    "type": "exact_terms"
+  },
+  {
+    "question": "How can I run some code after a response has already been sent back to the client?",
+    "ground_truth": "Use BackgroundTasks: declare a parameter of type BackgroundTasks in your path operation function and call background_tasks.add_task() to schedule work that runs after the response is sent.",
+    "type": "paraphrased"
+  },
+  {
+    "question": "What is the purpose of the StreamingResponse class?",
+    "ground_truth": "StreamingResponse lets you send a response back to the client as a stream of chunks rather than all at once, useful for large files or generated content.",
+    "type": "factual"
+  },
+  {
+    "question": "How do I stop handling a request early if something goes wrong inside a dependency?",
+    "ground_truth": "Raise an HTTPException inside the dependency function; FastAPI will stop processing and return that error response to the client.",
+    "type": "paraphrased"
+  },
+  {
+    "question": "What are lifespan events used for in FastAPI?",
+    "ground_truth": "Lifespan events let you run startup and shutdown logic for the application, such as opening or closing a database connection pool, using an async context manager passed to the FastAPI app.",
+    "type": "factual"
+  },
+  {
+    "question": "What does the response_model parameter on a path operation do?",
+    "ground_truth": "response_model tells FastAPI what shape the output data should be, and FastAPI will filter, validate, and document the response according to that model.",
+    "type": "factual"
+  },
+  {
+    "question": "How can multiple dependencies in the same request share one database connection?",
+    "ground_truth": "FastAPI caches the result of a dependency within a single request by default, so multiple dependencies that depend on the same underlying dependency will reuse the same instance instead of creating a new one each time.",
+    "type": "paraphrased"
+  },
+  {
+    "question": "How do I add CORS support to a FastAPI application?",
+    "ground_truth": "Add FastAPI's CORSMiddleware to the app, specifying allowed origins, methods, and headers.",
+    "type": "factual"
+  },
+  {
+    "question": "What's the difference between a path parameter and a query parameter?",
+    "ground_truth": "A path parameter is part of the URL path itself and is declared in the route pattern (e.g. /items/{item_id}), while a query parameter appears after a ? in the URL and is declared as a regular function parameter not present in the path.",
+    "type": "factual"
+  },
+  {
+    "question": "How do I configure FastAPI to store user sessions in Redis?",
+    "ground_truth": "This is not covered in FastAPI's own documentation — session storage with Redis would require a third-party library, not something built into the framework itself.",
+    "type": "out_of_scope"
+  },
+  {
+    "question": "What's the exact command to deploy a FastAPI app to AWS Lambda using Mangum?",
+    "ground_truth": "This is not covered in FastAPI's own documentation — Mangum is a separate third-party adapter library with its own documentation.",
+    "type": "out_of_scope"
+  },
+  {
+    "question": "How do I define a GraphQL resolver using Strawberry with FastAPI?",
+    "ground_truth": "This is not covered in FastAPI's own documentation — Strawberry GraphQL integration is handled by a separate third-party library.",
+    "type": "out_of_scope"
+  },
+  {
+    "question": "What complexity does self-attention have compared to recurrent layers?",
+    "ground_truth": "This is not covered in FastAPI's documentation at all — this question is about transformer architecture, unrelated to this knowledge base.",
+    "type": "out_of_scope"
+  },
+  {
+    "question": "How can I customize the automatically generated OpenAPI schema?",
+    "ground_truth": "FastAPI exposes the OpenAPI schema as app.openapi(), which can be overridden with a custom function that modifies the generated schema dictionary before returning it.",
+    "type": "factual"
+  }
+]
